@@ -1,34 +1,44 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import JSZip from "jszip";
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [files, setFiles] = useState([])
+
+  const handleUploadFile = (e) => {
+    const saveFiles = Array.from(e.target.files);
+    setFiles(saveFiles);
+  }
+
+  const handleDownloadZipFile = () => {
+    const zip = new JSZip();
+    files.forEach((f) => {
+      zip.file(f.name, f);
+    });
+    zip.generateAsync({ type: "blob" }).then((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      document.body.appendChild(a);
+      a.href = url;
+      a.download = "files.zip";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  };
+
 
   return (
-    <>
+    <div style={{ padding: '10px' }}>
+      <h2>Zip File</h2>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <input type='file' multiple onChange={handleUploadFile} />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+      <div style={{ marginTop: '20px' }}>
+        <button onClick={handleDownloadZipFile}>
+          Download
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
